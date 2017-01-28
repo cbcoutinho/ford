@@ -3,25 +3,25 @@
 #
 #  project.py
 #  This file is part of FORD.
-#  
+#
 #  Copyright 2014 Christopher MacMackin <cmacmackin@gmail.com>
-#  
+#
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
 #  the Free Software Foundation; either version 3 of the License, or
 #  (at your option) any later version.
-#  
+#
 #  This program is distributed in the hope that it will be useful,
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #  GNU General Public License for more details.
-#  
+#
 #  You should have received a copy of the GNU General Public License
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 #  MA 02110-1301, USA.
-#  
-#  
+#
+#
 
 
 from __future__ import print_function
@@ -31,13 +31,13 @@ import toposort
 
 import ford.sourceform
 
-INTRINSIC_MODS = {'iso_fortran_env': '<a href="https://software.intel.com/en-us/node/511041">iso_fortran_env</a>',
-                  'iso_c_binding': '<a href="https://software.intel.com/en-us/node/511038">iso_c_binding</a>',
-                  'ieee_arithmetic': '<a href="https://software.intel.com/en-us/node/511043">ieee_arithmetic</a>',
-                  'ieee_exceptions': '<a href="https://software.intel.com/en-us/node/511044">ieee_exceptions</a>',
-                  'ieee_features': '<a href="https://software.intel.com/en-us/node/511045">ieee_features</a>',
+INTRINSIC_MODS = {'iso_fortran_env': '<a href="https://software.intel.com/en-us/node/678626">iso_fortran_env</a>',
+                  'iso_c_binding': '<a href="https://software.intel.com/en-us/node/678623">iso_c_binding</a>',
+                  'ieee_arithmetic': '<a href="https://software.intel.com/en-us/node/678628">ieee_arithmetic</a>',
+                  'ieee_exceptions': '<a href="https://software.intel.com/en-us/node/678629">ieee_exceptions</a>',
+                  'ieee_features': '<a href="https://software.intel.com/en-us/node/678630">ieee_features</a>',
                   'openacc': '<a href="http://www.openacc.org/sites/default/files/OpenACC.2.0a_1.pdf#page=49">openacc</a>',
-                  'omp_lib': '<a href="https://gcc.gnu.org/onlinedocs/gcc-4.4.3/libgomp/Runtime-Library-Routines.html">omp_lib</a>',
+                  'omp_lib': '<a href="https://gcc.gnu.org/onlinedocs/gcc-4.8.0/gfortran/OpenMP.html">omp_lib</a>',
                   'mpi': '<a href="http://www.mpi-forum.org/docs/mpi-3.1/mpi31-report/node410.htm">mpi</a>',
                   'mpi_f08': '<a href="http://www.mpi-forum.org/docs/mpi-3.1/mpi31-report/node409.htm">mpi_f08</a>',}
 
@@ -47,17 +47,17 @@ class Project(object):
     project which is to be documented.
     """
     def __init__(self, settings):
-        self.settings = settings        
+        self.settings = settings
         self.name = settings['project']
         self.topdirs = settings['src_dir']
         self.extensions = settings['extensions']
         self.fixed_extensions = settings['fixed_extensions']
         self.extra_filetypes = settings['extra_filetypes']
         self.display = settings['display']
-        
+
         if settings['preprocess'].lower() != 'true': settings['fpp_extensions'] = []
-            
-        
+
+
         self.files = []
         self.modules = []
         self.programs = []
@@ -69,7 +69,7 @@ class Project(object):
         self.extra_files = []
         self.blockdata = []
         self.common = {}
-                
+
         # Get all files within topdir, recursively
         srctree = []
         for topdir in self.topdirs:
@@ -124,20 +124,20 @@ class Project(object):
                             except Exception as e:
                                 print("Warning: Error parsing {}.\n\t{}".format(os.path.relpath(os.path.join(curdir,item)),e.args[0]))
                                 continue
-        self.allfiles = self.files + self.extra_files                
+        self.allfiles = self.files + self.extra_files
 
 
     def __str__(self):
         return self.name
-    
+
     def correlate(self):
         """
         Associates various constructs with each other.
         """
 
         print("Correlating information from different parts of your project...")
-                        
-        non_local_mods = INTRINSIC_MODS        
+
+        non_local_mods = INTRINSIC_MODS
         for item in self.settings['extra_mods']:
             i = item.index(':')
             if i < 0:
@@ -146,15 +146,15 @@ class Project(object):
             name = item[:i].strip()
             url = item[i+1:].strip()
             non_local_mods[name.lower()] = '<a href="{}">{}</a>'.format(url,name)
-        
+
         # Match USE statements up with the right modules
         containers = self.modules + self.procedures + self.programs + self.submodules + self.blockdata
         for container in containers:
             id_mods(container,self.modules,non_local_mods,self.submodules)
-            
+
         # Get the order to process other correlations with
         deplist = {}
-        
+
         def get_deps(item):
             uselist = [m[0] for m in item.uses]
             for proc in getattr(item,'subroutines',[]):
@@ -164,7 +164,7 @@ class Project(object):
             for proc in getattr(item,'modprocedures',[]):
                 uselist.extend(get_deps(proc))
             return uselist
-        
+
         for mod in self.modules:
             uselist = get_deps(mod)
             uselist = [m for m in uselist if type(m) == ford.sourceform.FortranModule]
@@ -199,18 +199,18 @@ class Project(object):
             if proc.parobj == 'sourcefile': ranklist.append(proc)
         ranklist.extend(self.programs)
         ranklist.extend(self.blockdata)
-        
+
         # Perform remaining correlations for the project
         for container in ranklist:
             if type(container) != str: container.correlate(self)
         for container in ranklist:
             if type(container) != str: container.prune()
-        
+
         if self.settings['project_url'] == '.':
             url = '..'
         else:
             url = self.settings['project_url']
-        
+
         for sfile in self.files:
             for module in sfile.modules:
                 for function in module.functions:
@@ -223,7 +223,7 @@ class Project(object):
                     self.absinterfaces.append(absint)
                 for dtype in module.types:
                     self.types.append(dtype)
-            
+
             for module in sfile.submodules:
                 for function in module.functions:
                     self.procedures.append(function)
@@ -253,7 +253,7 @@ class Project(object):
                     self.absinterfaces.append(absint)
                 for dtype in program.types:
                     self.types.append(dtype)
-                    
+
             for block in sfile.blockdata:
                 for dtype in block.types:
                     self.types.append(dtype)
@@ -273,7 +273,7 @@ class Project(object):
         Process the documentation with Markdown to produce HTML.
         """
         print("\nProcessing documentation comments...")
-        ford.sourceform.set_base_url(base_url)        
+        ford.sourceform.set_base_url(base_url)
         if self.settings['warn'].lower() == 'true': print()
         for src in self.files + self.extra_files:
             src.markdown(md,self)
@@ -281,11 +281,11 @@ class Project(object):
 
     def make_links(self,base_url='..'):
         """
-        Substitute intrasite links to documentation for other parts of 
+        Substitute intrasite links to documentation for other parts of
         the program.
         """
-        
-        ford.sourceform.set_base_url(base_url)        
+
+        ford.sourceform.set_base_url(base_url)
         for src in self.files + self.extra_files:
             src.make_links(self)
         return
