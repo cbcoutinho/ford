@@ -2,26 +2,26 @@
 # -- coding: utf-8 --
 #
 #  ford.py
-#  
+#
 #  Copyright 2014 Christopher MacMackin <cmacmackin@gmail.com>
 #  This file is part of FORD.
-#  
+#
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
 #  the Free Software Foundation; either version 3 of the License, or
 #  (at your option) any later version.
-#  
+#
 #  This program is distributed in the hope that it will be useful,
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #  GNU General Public License for more details.
-#  
+#
 #  You should have received a copy of the GNU General Public License
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 #  MA 02110-1301, USA.
-#  
-#  
+#
+#
 
 from __future__ import print_function
 from contextlib import contextmanager
@@ -52,7 +52,7 @@ __maintainer__ = "Chris MacMackin"
 __status__     = "Production"
 
 if sys.version_info[0] < 3:
-    reload(sys)  
+    reload(sys)
     sys.setdefaultencoding('utf8')
 
 @contextmanager
@@ -79,7 +79,7 @@ LICENSES = { 'by': '<a rel="license" href="http://creativecommons.org/licenses/b
 
 def initialize():
     """
-    Method to parse and check configurations of FORD, get the project's 
+    Method to parse and check configurations of FORD, get the project's
     global documentation, and create the Markdown reader.
     """
     # Setup the command-line options and parse them.
@@ -112,14 +112,14 @@ def initialize():
     md_ext = ['markdown.extensions.meta','markdown.extensions.codehilite',
               'markdown.extensions.extra',MathJaxExtension(),'md_environ.environ']
     md = markdown.Markdown(extensions=md_ext, output_format="html5",
-    extension_configs={})
+                           extension_configs={})
     # Read in the project-file. This will contain global documentation (which
     # will appear on the homepage) as well as any information about the project
     # and settings for generating the documentation.
     proj_docs = args.project_file.read()
     md.convert(proj_docs)
     # Remake the Markdown object with settings parsed from the project_file
-    if 'md_base_dir' in md.Meta: md_base = md.Meta['md_base_dir'][0] 
+    if 'md_base_dir' in md.Meta: md_base = md.Meta['md_base_dir'][0]
     else: md_base = os.path.dirname(args.project_file.name)
     md_ext.append('markdown_include.include')
     if 'md_extensions' in md.Meta: md_ext.extend(md.Meta['md_extensions'])
@@ -288,7 +288,7 @@ def initialize():
         else:
             proj_data['preprocess'] = 'true'
             proj_data['preprocessor'] = preprocessor
-    
+
     # Get correct license
     try:
         proj_data['license'] = LICENSES[proj_data['license'].lower()]
@@ -310,7 +310,7 @@ def main(proj_data,proj_docs,md):
     project = ford.fortran_project.Project(proj_data)
     if len(project.files) < 1:
         print("Error: No source files with appropriate extension found in specified directory.")
-        sys.exit(1)        
+        sys.exit(1)
     # Convert the documentation from Markdown to HTML. Make sure to properly
     # handle LateX and metadata.
     if proj_data['relative']:
