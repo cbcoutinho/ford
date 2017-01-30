@@ -150,7 +150,10 @@ class Project(object):
         # Match USE statements up with the right modules
         containers = self.modules + self.procedures + self.programs + self.submodules + self.blockdata
         for container in containers:
-            id_mods(container,self.modules,non_local_mods,self.submodules)
+            id_mods(container,
+                    self.modules,
+                    non_local_mods,
+                    self.submodules)
 
         # Get the order to process other correlations with
         deplist = {}

@@ -326,11 +326,16 @@ def main(proj_data,proj_docs,md):
     if proj_data['relative']: ford.sourceform.set_base_url('.')
     if 'summary' in proj_data:
         proj_data['summary'] = md.convert(proj_data['summary'])
-        proj_data['summary'] = ford.utils.sub_links(ford.utils.sub_macros(ford.utils.sub_notes(proj_data['summary']),proj_data['project_url']),project)
+        proj_data['summary'] = ford.utils.sub_links(ford.utils.sub_macros(ford.utils.sub_notes(proj_data['summary']),proj_data['project_url']),
+                                                    project)
     if 'author_description' in proj_data:
         proj_data['author_description'] = md.convert(proj_data['author_description'])
-        proj_data['author_description'] = ford.utils.sub_links(ford.utils.sub_macros(ford.utils.sub_notes(proj_data['author_description']),proj_data['project_url']),project)
-    proj_docs_ = ford.utils.sub_links(ford.utils.sub_macros(ford.utils.sub_notes(proj_docs),proj_data['project_url']),project)
+        proj_data['author_description'] = ford.utils.sub_links(ford.utils.sub_macros(ford.utils.sub_notes(proj_data['author_description']),
+                                                                                     proj_data['project_url']),
+                                                               project)
+    proj_docs_ = ford.utils.sub_links(ford.utils.sub_macros(ford.utils.sub_notes(proj_docs),
+                                                            proj_data['project_url']),
+                                      project)
     # Process any pages
     if 'page_dir' in proj_data:
         page_tree = ford.pagetree.get_page_tree(os.path.normpath(proj_data['page_dir']),md)
