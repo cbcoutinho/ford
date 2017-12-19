@@ -326,7 +326,8 @@ class Project(object):
     def recursive_dir_list(self,topdir,skip):
         dir_list = []
         for entry in os.listdir(topdir):
-            abs_entry = os.path.join(topdir,entry)
+            # FIXME: This should probably deal with proj_data['relatve']
+            abs_entry = os.path.join(os.path.abspath(topdir),entry)
             if os.path.isdir(abs_entry) and (abs_entry not in skip):
                 dir_list.append( abs_entry )
                 dir_list += self.recursive_dir_list(abs_entry,skip)
